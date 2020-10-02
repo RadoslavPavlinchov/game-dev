@@ -1,0 +1,14 @@
+{
+  "name": "game-development",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Radoslav Pavlinchov",
+  "license": "ISC",
+  "dependencies": {
+    "pixi.js": "^5.3.3"
+  }
+}
