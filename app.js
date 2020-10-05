@@ -1,77 +1,112 @@
-// Making Aliases
+// ---------- Aliases ----------
 const Application = PIXI.Application;
+const Container = PIXI.Container;
 const loader = PIXI.Loader.shared;
 const resources = PIXI.Loader.shared.resources;
+const TextureCache = PIXI.utils.TextureCache;
 const Sprite = PIXI.Sprite;
+const Rectangle = PIXI.Rectangle;
 
-// Create the canvas
+
+// ---------- Create a Pixi Application ---------- 
 const app = new Application({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    // backgroundColor: 0x008000,
-    antialias: true,    // default: false
-    transparent: false, // default: false
+    width: 512,
+    height: 512,
+    antialias: true,
+    transparent: false,
     resolution: 1
 });
 
-app.renderer.backgroundColor = 0x000000;
-// app.renderer.view.style.position = "absolute";
-// app.renderer.view.style.display = "block";
-// app.renderer.autoDensity = true;
-// app.renderer.resize(window.innerWidth, window.innerHeight);
 
-// Add the canvas to the HTML
+// ---------- Add the canvas that Pixi automatically created for you to the HTML document ---------- 
 document.body.appendChild(app.view);
 
-// let texture = PIXI.utils.TextureCache["images/download.jpg"];
-// let sprite = new PIXI.Sprite(texture);
 
-// Load an image, we can give a name to the loading file
+//load a JSON file and run the `setup` function when it's done
 loader
-    .add("images/cat.png")
-    // Tried to add a print on the console, but it does not work with the latest version
-    // .onProgress.add(() => loadProgressHandler())
+    .add("images/published/published.json")
     .load(setup);
 
-// function loadProgressHandler() {
-//     console.log("loading");
-// }
+
+// ---------- Define variables that might be used in more than one function ---------- 
+let dungeon, explorer, treasure, door, id;
+
 
 function setup() {
-    const sprite = new Sprite(
-        resources["images/cat.png"].texture
+
+    //There are 3 ways to make sprites from textures atlas frames
+
+    // ----- 1. Access the `TextureCache` directly -----
+    let dungeonTexture = TextureCache["dungeon.png"];
+    dungeon = new Sprite(dungeonTexture);
+    app.stage.addChild(dungeon);
+
+
+    // ----- 2. Access the texture using through the loader's `resources` -----
+    explorer = new Sprite(
+        resources["images/published/published.json"].textures["explorer.png"]
     );
-    // sprite.x = 150;
-    // sprite.y = 150;
+    explorer.x = 68;
 
-    // Setting up the position in one single line of code
-    sprite.position.set(200, 200); // Shorthand syntax
 
-    // Size and Scale
-    sprite.width = 80;
-    sprite.height = 120;
+    //Center the explorer vertically
+    explorer.y = app.stage.height / 2 - explorer.height / 2;
+    app.stage.addChild(explorer);
 
-    // Set the scale proportionately
-    // sprite.scale.x = 2;
-    // sprite.scale.y = 2;
-    sprite.scale.set(1.5, 1.5); // Shorthand syntax
 
-    // Rotation: the default rotation is around the sprite anchor point, which is the top left corner of
-    // the sprite where the x and y start
-    sprite.rotation = 0.5;
+    // ----- 3. Create an optional alias called `id` for all the texture atlas frame id textures. -----
+    id = resources["images/published/published.json"].textures;
 
-    // Change the anchor point, this way it is centered inside the sprite and it look like it is spinning
-    // sprite.anchor.x = 0.5;
-    // sprite.anchor.y = 0.5;
-    sprite.anchor.set(0.5, 0.5); // Shorthand syntax
 
-    // The pivot property works similar to the anchor, but it uses pixels
-    // sprite.pivot.set(32, 32); // Shorthand syntax
+    //Make the treasure box using the alias
+    treasure = new Sprite(id["treasure.png"]);
+    app.stage.addChild(treasure);
 
-    // Add the sprite to Stage
-    app.stage.addChild(sprite);
+
+    //Position the treasure next to the right edge of the canvas
+    treasure.x = app.stage.width - treasure.width - 48;
+    treasure.y = app.stage.height / 2 - treasure.height / 2;
+    app.stage.addChild(treasure);
+
+
+    //Make the exit door
+    door = new Sprite(id["door.png"]);
+    door.position.set(32, 0);
+    app.stage.addChild(door);
+
+
+    //Make the blobs
+    let numberOfBlobs = 6,
+        spacing = 48,
+        xOffset = 150
+
+    //The `randomInt` helper function
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    //Make as many blobs as there are `numberOfBlobs`
+    for (let i = 0; i < numberOfBlobs; i++) {
+
+        //Make a blob
+        let blob = new Sprite(id["blob.png"]);
+
+        //Space each blob horizontally according to the `spacing` value.
+        //`xOffset` determines the point from the left of the screen
+        //at which the first blob should be added.
+        let x = spacing * i + xOffset;
+
+        //Give the blob a random y position
+        //(`randomInt` is a custom function - see below)
+        let y = randomInt(0, app.stage.height - blob.height);
+
+        //Set the blob's position
+        blob.x = x;
+        blob.y = y;
+
+        //Add the blob sprite to the stage
+        app.stage.addChild(blob);
+    }
+
+
 }
-
-
-
-
